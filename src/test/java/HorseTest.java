@@ -24,4 +24,20 @@ public class HorseTest {
         assertEquals("Name cannot be blank.", exception.getMessage());
     }
 
+    @Test
+    public void speedNegativeExceptionMessage() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> new Horse("abc", -1, 1));
+
+        assertEquals("Speed cannot be negative.", exception.getMessage());
+    }
+
+    @Test
+    public void distanceNegativeExceptionMessage() {
+        IllegalArgumentException exception =
+                assertThrows(IllegalArgumentException.class, () -> new Horse("abc", 1, -1));
+
+        assertEquals("Distance cannot be negative.", exception.getMessage());
+    }
+
 }
