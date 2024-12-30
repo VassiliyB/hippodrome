@@ -1,6 +1,8 @@
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 
@@ -11,6 +13,7 @@ public class HorseTest {
 
     @Test
     public void nameNullExceptionMessage() {
+
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> new Horse(null, 1, 1));
 
@@ -20,6 +23,7 @@ public class HorseTest {
     @ParameterizedTest
     @ValueSource(strings = {"", "   ", "\t\t", "\n\n\n\n\n"})
     public void nameBlancExceptionMessage(String name) {
+
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> new Horse(name, 1, 1));
 
@@ -28,6 +32,7 @@ public class HorseTest {
 
     @Test
     public void speedNegativeExceptionMessage() {
+
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> new Horse("Bucephalus", -1, 1));
 
@@ -36,6 +41,7 @@ public class HorseTest {
 
     @Test
     public void distanceNegativeExceptionMessage() {
+
         IllegalArgumentException exception =
                 assertThrows(IllegalArgumentException.class, () -> new Horse("Bucephalus", 1, -1));
 
@@ -44,6 +50,7 @@ public class HorseTest {
 
     @Test
     public void getNameTest() throws NoSuchFieldException, IllegalAccessException {
+
         Horse horse = new Horse("Bucephalus", 1, 1);
 
         Field name = Horse.class.getDeclaredField("name");
@@ -55,6 +62,7 @@ public class HorseTest {
 
     @Test
     public void getSpeedTest() throws NoSuchFieldException, IllegalAccessException {
+
         Horse horse = new Horse("Bucephalus", 1, 1);
 
         Field speed = Horse.class.getDeclaredField("speed");
@@ -66,6 +74,7 @@ public class HorseTest {
 
     @Test
     public void getDistanceTest() throws NoSuchFieldException, IllegalAccessException {
+
         Horse horse = new Horse("Bucephalus", 1, 1);
 
         Field distance = Horse.class.getDeclaredField("distance");
@@ -76,12 +85,36 @@ public class HorseTest {
     }
 
     @Test
-    public void getDurationDefaultConstructor() throws NoSuchFieldException, IllegalAccessException {
+    public void getDistanceDefaultConstructor() throws NoSuchFieldException, IllegalAccessException {
+
         Horse horse = new Horse("Bucephalus", 1);
         Field distance = Horse.class.getDeclaredField("distance");
         distance.setAccessible(true);
 
         Double actualDistance = (Double) distance.get(horse);
         assertEquals(0, actualDistance);
+    }
+
+    @Test
+    public void moveUseGetRandom() {
+        try(MockedStatic<Horse> mockedHorseStatic = Mockito.mockStatic(Horse.class)) {
+
+            new Horse("Bucephalus", 1, 1).move();
+            mockedHorseStatic.verify(() -> Horse.getRandomDouble(0.2, 0.9));
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {0.8, 0.5, 0.3, 0.456, 100.555})
+    public void moveAssignsValueToDistance(double random) {
+        try(MockedStatic<Horse> mockedHorseStatic = Mockito.mockStatic(Horse.class)) {
+            
+            Horse horse = new Horse("Bucephalus", 5.0, 4.0);
+            mockedHorseStatic.when(() -> Horse.getRandomDouble(0.2, 0.9)).thenReturn(random);
+
+            horse.move();
+
+            assertEquals(4.0 + 5.0 * random, horse.getDistance());
+        }
     }
 }
